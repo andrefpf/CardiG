@@ -1,0 +1,16 @@
+[mockup]
+path = 'modelo.jpg'
+start_x = 90
+start_y = 198 
+end_x = 647
+end_y = 755
+
+[card.'Minha caveira']
+path = 'dados/caveira.jpeg'
+output = 'resultado/caveira.jpeg'
+text = 'Textículo sobre caveiras'
+
+[card.'Minha célula']
+path = 'dados/célula.png'
+output = 'resultado/célula.png'
+text = 'Textículo sobre células'
