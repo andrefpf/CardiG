@@ -5,9 +5,11 @@ from PIL import ImageDraw
 
 
 class Generator:
-    def __init__(self, mockup, start=(0,0), end=(100,100)):
+    def __init__(self, mockup):
         self.mockup = mockup
-        self.set_image_location(start, end)
+        self.mock_start = (0,0)
+        self.mock_end = (0,0)
+        self.mock_size = (0,0)
 
     @classmethod
     def from_configs(cls, config):
@@ -15,40 +17,55 @@ class Generator:
         cards_config = config['card']
 
         mockup = Image.open(mockup_config['path'])
-        start = (mockup_config['start_x'], mockup_config['start_y'])
-        end = (mockup_config['end_x'], mockup_config['end_y'])
+        generator = cls(mockup)
 
-        generator = cls(mockup, start, end)
+        x0, y0 = mockup_config['title_pos']
+        generator.set_title_location((x0,y0))
+
+        x0,y0,x1,y1 = mockup_config['image_pos']
+        generator.set_image_location((x0,y0), (x1,y1))
+
+        x0,y0,x1,y1 = mockup_config['text_pos']
+        generator.set_text_location((x0,y0), (x1,y1))
 
         for title, card in cards_config.items():
             img = Image.open(card['path'])
             generator.apply_in_image(img, title, card['text']).save(card['output'])
 
+    def set_title_location(self, pos):
+        self.title_pos = pos
+
     def set_image_location(self, start, end):
-        self.m_start = start
-        self.m_end = end
-        self.m_size = (self.m_end[0] - self.m_start[0],
-                       self.m_end[1] - self.m_start[1])
+        self.mock_start = start
+        self.mock_end = end
+        self.mock_size = (self.mock_end[0] - self.mock_start[0],
+                       self.mock_end[1] - self.mock_start[1])
+
+    def set_text_location(self, start, end):
+        self.text_start = start
+        self.text_end = end
+        self.text_size = (self.text_end[0] - self.text_start[0],
+                       self.text_end[1] - self.text_start[1])
 
     def apply_in_image(self, image, title='', text=''):
         mask = None
         if image.mode == 'RGBA':
-            mask = image.split()[3].resize(self.m_size)
-        image = image.resize(self.m_size)
+            mask = image.split()[3].resize(self.mock_size)
+        image = image.resize(self.mock_size)
 
         mockuped = self.mockup.copy()
-        mockuped.paste(image, self.m_start, mask)
+        mockuped.paste(image, self.mock_start, mask)
         
-        title_font = ImageFont.truetype("fonts/OpenSans-Bold.ttf", 50)
+        title_font = ImageFont.truetype("fonts/OpenSans-Bold.ttf", 30)
         text_font = ImageFont.truetype("fonts/OpenSans-Regular.ttf", 20)
         white = (255,255,255)
         black = (0,0,0)
 
+        text = self._resize_text(text, text_font)
+
         draw = ImageDraw.Draw(mockuped)
-        draw.text((368, 80), title, white, font=title_font, anchor="mm")
-        draw.text((90, 900), text, black, font=text_font)
-
-
+        draw.text(self.title_pos, title, black, font=title_font, anchor="mm")
+        draw.multiline_text(self.text_start, text, black, font=text_font)
 
         return mockuped
 
@@ -58,3 +75,20 @@ class Generator:
             ap = self.apply_in_image(image)
             applied.append(ap)
         return applied
+
+    def _split_in_lines(self, text, line_size):
+        last = 0
+        for current in range(line_size, len(text), line_size):
+            line = text[last:current].strip()
+            if text[current] != ' ':
+                line += '-'
+            yield line
+            last = current
+        yield text[last:len(text)]
+
+    def _resize_text(self, text_string, font):
+        ascent, descent = font.getmetrics()
+        text_width = font.getmask(text_string).getbbox()[2]
+        max_text_width = self.text_end[0] - self.text_start[0]
+        max_chars = len(text_string) * max_text_width // text_width
+        return '\n'.join(i for i in self._split_in_lines(text_string, max_chars))
