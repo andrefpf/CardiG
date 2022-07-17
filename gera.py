@@ -1,5 +1,5 @@
 from cardig.generator import Generator
 import toml
 
-config = toml.load('examples/config_1.toml')
+config = toml.load('examples/config.toml')
 Generator.from_configs(config)

@@ -1,0 +1,21 @@
+[mockup]
+path = 'examples/template_azul.png'
+title_pos = [354, 108]
+image_pos = [105, 213, 605, 673]
+text_pos = [125, 758, 585, 969]
+
+[card.'Patrick']
+path = 'examples/origin/patrick.png'
+output = 'examples/output/patrick_card.png'
+text = 'Este é o patrick, amigo do bob esponja tal tal tal, é isso aí. Uma carta muito boa.'
+
+[card.'Minha célula']
+path = 'examples/origin/pepa.png'
+output = 'examples/output/pepa_card.png'
+text = 'Esta é a Pepa Pig Deformada. Não sei muita coisa sobre ela.'
+
+[card.'Golgi']
+path = 'examples/origin/golgi.png'
+output = 'examples/output/golgi_card.png'
+text = 'Este é o famoso complexo Golgiense, que o Giordano não curte que chame assim porque gosta mais de Complexo de Golgi.'
+

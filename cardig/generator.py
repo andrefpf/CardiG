@@ -56,8 +56,8 @@ class Generator:
         mockuped = self.mockup.copy()
         mockuped.paste(image, self.mock_start, mask)
         
-        title_font = ImageFont.truetype("fonts/OpenSans-Bold.ttf", 30)
-        text_font = ImageFont.truetype("fonts/OpenSans-Regular.ttf", 20)
+        title_font = ImageFont.truetype("fonts/OpenSans-Bold.ttf", 35)
+        text_font = ImageFont.truetype("fonts/OpenSans-Regular.ttf", 22)
         white = (255,255,255)
         black = (0,0,0)
 
@@ -78,12 +78,18 @@ class Generator:
 
     def _split_in_lines(self, text, line_size):
         last = 0
-        for current in range(line_size, len(text), line_size):
-            line = text[last:current].strip()
-            if text[current] != ' ':
-                line += '-'
-            yield line
-            last = current
+        last_space = 0
+
+        spaces = [' ', '\n']
+
+        for i, char in enumerate(text):
+            if char in spaces:
+                last_space = i
+
+            diff = (i - last)
+            if diff == line_size:
+                yield text[last:last_space]
+                last = last_space + 1
         yield text[last:len(text)]
 
     def _resize_text(self, text_string, font):
